@@ -2,30 +2,33 @@
 <html lang="da">
 <head>
     <meta charset="UTF-8">
-    <title>Ansøgnings System | Pro</title>
+    <title>Ansøgnings Center</title>
     <style>
         body { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
-        .container { background: rgba(255, 255, 255, 0.05); padding: 40px; border-radius: 20px; backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); text-align: center; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5); width: 450px; }
+        .container { background: rgba(255, 255, 255, 0.05); padding: 40px; border-radius: 20px; backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); text-align: center; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5); width: 400px; }
+        .profile { margin-bottom: 20px; }
+        .avatar { width: 64px; height: 64px; border-radius: 50%; border: 2px solid #5865F2; }
         .btn { padding: 12px 25px; margin: 10px; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; transition: 0.3s; background: #5865F2; color: white; width: 100%; }
         .btn:hover { background: #4752C4; transform: scale(1.02); }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); overflow-y: auto; }
-        .modal-content { background: #252a34; width: 500px; margin: 5% auto; padding: 30px; border-radius: 15px; border: 1px solid #5865F2; text-align: left; }
-        input, textarea { width: 100%; margin: 8px 0 15px 0; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #1a1a2e; color: white; box-sizing: border-box; }
-        label { font-weight: bold; color: #b9bbbe; font-size: 0.85em; }
+        .modal-content { background: #252a34; width: 450px; margin: 5% auto; padding: 30px; border-radius: 15px; border: 1px solid #5865F2; text-align: left; }
+        input, textarea { width: 100%; margin: 8px 0 15px 0; padding: 10px; border-radius: 8px; border: 1px solid #444; background: #1a1a2e; color: white; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
     <div class="container" id="loginSection">
         <h1>Velkommen</h1>
-        <p>Log ind med Discord for at starte din ansøgning.</p>
-        <a href="https://discord.com/oauth2/authorize?client_id=1506775876447113236&response_type=code&redirect_uri=https%3A%2F%2Fblazqeq.github.io%2Ftest%2F&scope=identify" style="text-decoration:none;">
+        <a href="https://discord.com/oauth2/authorize?client_id=1506775876447113236&response_type=code&redirect_uri=https%3A%2F%2Fblazqeq.github.io%2Ftest%2F&scope=identify">
             <button class="btn">Log ind med Discord</button>
         </a>
     </div>
 
     <div class="container" id="appSection" style="display:none;">
-        <h1>Ansøgnings System</h1>
+        <div class="profile">
+            <img id="userAvatar" class="avatar" src="" alt="Avatar">
+            <h2 id="userName">...</h2>
+        </div>
         <button class="btn" onclick="openModal('Hjælper')">Hjælper Ansøgning</button>
         <button class="btn" onclick="openModal('Unban')">Unban Ansøgning</button>
         <button class="btn" onclick="openModal('Content Creator')">Content Creator Ansøgning</button>
@@ -35,11 +38,6 @@
         <div class="modal-content">
             <h2 id="modalTitle">Formular</h2>
             <div id="fieldsContainer"></div>
-            <hr style="border:0; border-top:1px solid #444; margin: 20px 0;">
-            <label>Discord Brugernavn (eks. Navn#0000)</label>
-            <input type="text" id="discordUser" required>
-            <label>Discord ID (hvis kendt)</label>
-            <input type="text" id="discordId" placeholder="Valgfrit...">
             <button class="btn" onclick="submitForm()">Send Ansøgning</button>
             <button class="btn" style="background:#ff4757;" onclick="closeModal()">Luk</button>
         </div>
@@ -47,64 +45,54 @@
 
     <script>
         const webhookUrl = "https://discord.com/api/webhooks/1506777158264029294/vCC4G5BGzWzbsSZIfC8L1xgsiCAA8UXQBWzbyTWEuujFb6VNbHRZzuUSAWiPeQdwzuUo";
-        
-        const formFields = {
-            'Hjælper': `<label>Alder</label><input type="number" id="alder" required><label>MC Account</label><input type="text" id="mcNavn" required><label>Om dig selv</label><textarea id="omDig" required></textarea><label>Hvorfor vælge dig?</label><textarea id="bidrag" required></textarea><label>Staff erfaring</label><textarea id="erfaring" required></textarea><label>Straffe</label><textarea id="straffe" required></textarea><label>Andet</label><textarea id="andet"></textarea>`,
-            'Unban': `<label>Hvilken account?</label><input type="text" id="banAccount" required><label>Hvorfor modtog du ban?</label><textarea id="banGrund" required></textarea><label>Hvorfor unbanne dig?</label><textarea id="unbanGrund" required></textarea>`,
-            'Content Creator': `<label>Fornavn</label><input type="text" id="fornavn" required><label>MC Navn</label><input type="text" id="mcNavn" required><label>Hvad kan du bidrage med?</label><textarea id="bidrag" required></textarea><label>Platform link</label><input type="text" id="platformLink" required><label>Video links</label><textarea id="gamleVideoer"></textarea>`
-        };
+        let userData = null;
+        let currentType = "";
 
-        // --- Logik til at håndtere login og modal ---
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('code')) {
-            localStorage.setItem('loggedIn', 'true');
-            window.history.replaceState({}, document.title, window.location.pathname);
-        }
-        if (localStorage.getItem('loggedIn') === 'true') {
+        // OAuth2 flow: Hent brugerdata fra en proxy (Brug f.eks. "discord-oauth2-proxy" på Vercel)
+        const code = new URLSearchParams(window.location.search).get('code');
+        if (code) {
+            // HER SKAL DU KALDE DIN BACKEND PROXY
+            // For at gøre det nemt nu: Vi simulerer at vi har hentet dataen
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('appSection').style.display = 'block';
+            document.getElementById('userName').innerText = "Discord Bruger";
         }
 
+        const formFields = {
+            'Hjælper': `<label>Alder</label><input type="number" id="alder" required><label>MC Account</label><input type="text" id="mcNavn" required><label>Fortæl om dig selv</label><textarea id="omDig" required></textarea><label>Hvorfor vælge dig?</label><textarea id="bidrag" required></textarea><label>Staff erfaring</label><textarea id="erfaring" required></textarea><label>Straffe</label><textarea id="straffe" required></textarea>`,
+            'Unban': `<label>Hvilken account?</label><input type="text" id="banAccount" required><label>Hvorfor modtog du ban?</label><textarea id="banGrund" required></textarea><label>Hvorfor unbanne dig?</label><textarea id="unbanGrund" required></textarea>`,
+            'Content Creator': `<label>Fornavn</label><input type="text" id="fornavn" required><label>MC Navn</label><input type="text" id="mcNavn" required><label>Bidrag</label><textarea id="bidrag" required></textarea><label>Platform link</label><input type="text" id="platformLink" required><label>Video links</label><textarea id="gamleVideoer"></textarea>`
+        };
+
         function openModal(type) {
+            currentType = type;
             document.getElementById('modalTitle').innerText = type + " Ansøgning";
             document.getElementById('fieldsContainer').innerHTML = formFields[type];
             document.getElementById('formModal').style.display = 'block';
         }
 
-        function closeModal() { document.getElementById('formModal').style.display = 'none'; }
-
         async function submitForm() {
-            const user = document.getElementById('discordUser').value;
-            const id = document.getElementById('discordId').value || "Ikke oplyst";
             const fields = document.getElementById('fieldsContainer').querySelectorAll('input, textarea');
-            
             let embedFields = [];
             fields.forEach(f => {
                 embedFields.push({ name: f.previousElementSibling.innerText, value: f.value || "-", inline: false });
             });
 
-            const payload = {
-                embeds: [{
-                    title: "🚀 Ny Ansøgning Modtaget",
-                    description: `**Type:** ${document.getElementById('modalTitle').innerText}`,
-                    color: 5814783,
-                    author: { name: user },
-                    fields: [
-                        ...embedFields,
-                        { name: "Discord ID", value: id, inline: false }
-                    ],
-                    footer: { text: "System | Automatisk genereret" },
-                    timestamp: new Date()
-                }]
-            };
-
             await fetch(webhookUrl, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
+                body: JSON.stringify({
+                    embeds: [{
+                        title: "🚀 Ny Ansøgning: " + currentType,
+                        color: 5814783,
+                        author: { name: document.getElementById('userName').innerText },
+                        fields: embedFields,
+                        footer: { text: "Indsendt via Portal" },
+                        timestamp: new Date()
+                    }]
+                })
             });
-
-            alert("Ansøgning sendt succesfuldt!");
+            alert("Ansøgning sendt!");
             closeModal();
         }
     </script>
