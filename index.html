@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <title>Forum System</title>
+    <style>
+        #appArea { display: none; } /* Skjult indtil login */
+        .login-box { text-align: center; margin-top: 50px; }
+    </style>
+</head>
+<body>
+
+    <div id="loginBox" class="login-box">
+        <h2>Log ind for at ansøge</h2>
+        <a href="https://discord.com/oauth2/authorize?client_id=1506775876447113236&response_type=code&redirect_uri=https%3A%2F%2Fblazqeq.github.io%2Ftest%2F&scope=identify">
+            <button>Log ind med Discord</button>
+        </a>
+    </div>
+
+    <div id="appArea">
+        <h2>Velkommen, Discord bruger!</h2>
+        <textarea id="ansøgning" placeholder="Skriv din ansøgning her..."></textarea>
+        <button onclick="sendAnsøgning()">Send Ansøgning</button>
+    </div>
+
+    <script>
+        // Tjek om der er en 'code' i URL'en (fra Discord redirect)
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+
+        if (code) {
+            document.getElementById('loginBox').style.display = 'none';
+            document.getElementById('appArea').style.display = 'block';
+        }
+
+        async function sendAnsøgning() {
+            const webhookUrl = "https://discord.com/api/webhooks/1506777158264029294/vCC4G5BGzWzbsSZIfC8L1xgsiCAA8UXQBWzbyTWEuujFb6VNbHRZzuUSAWiPeQdwzuUo";
+            const indhold = document.getElementById('ansøgning').value;
+
+            await fetch(webhookUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ content: "Ny ansøgning modtaget: " + indhold })
+            });
+
+            alert("Ansøgning sendt!");
+        }
+    </script>
+</body>
+</html>
