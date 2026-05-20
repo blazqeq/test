@@ -2,7 +2,7 @@
 <html lang="da">
 <head>
     <meta charset="UTF-8">
-    <title>Ansøgnings Center</title>
+    <title>Ansøgnings System</title>
     <style>
         body { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
         .container { background: rgba(255, 255, 255, 0.05); padding: 40px; border-radius: 20px; backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); text-align: center; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5); width: 400px; }
@@ -11,13 +11,14 @@
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); overflow-y: auto; }
         .modal-content { background: #252a34; width: 450px; margin: 5% auto; padding: 30px; border-radius: 15px; border: 1px solid #5865F2; text-align: left; }
         input, textarea { width: 100%; margin: 8px 0 15px 0; padding: 10px; border-radius: 8px; border: 1px solid #444; background: #1a1a2e; color: white; box-sizing: border-box; }
+        label { font-weight: bold; font-size: 0.9em; }
     </style>
 </head>
 <body>
 
     <div class="container" id="loginSection">
         <h1>Velkommen</h1>
-        <p>Log ind med Discord for at ansøge.</p>
+        <p>Log ind med Discord for at få adgang til vores ansøgningscenter.</p>
         <a href="https://discord.com/oauth2/authorize?client_id=1506775876447113236&response_type=code&redirect_uri=https%3A%2F%2Fblazqeq.github.io%2Ftest%2F&scope=identify" style="text-decoration:none;">
             <button class="btn">Log ind med Discord</button>
         </a>
@@ -27,85 +28,82 @@
         <h1>Ansøgnings Center</h1>
         <button class="btn" onclick="openModal('Hjælper')">Hjælper Ansøgning</button>
         <button class="btn" onclick="openModal('Unban')">Unban Ansøgning</button>
-        <button class="btn" onclick="openModal('Content Creator')">Content Creator</button>
+        <button class="btn" onclick="openModal('Content Creator')">Content Creator Ansøgning</button>
     </div>
 
     <div id="formModal" class="modal">
         <div class="modal-content">
             <h2 id="modalTitle">Formular</h2>
-            <form id="ansøgningsForm">
-                <label>Hvad er din alder?</label>
-                <input type="number" id="alder" required>
-
-                <label>Hvad hedder din minecraft account?</label>
-                <input type="text" id="mcNavn" required>
-
-                <label>Fortæl om dig selv</label>
-                <textarea id="omDig" required></textarea>
-
-                <label>Hvorfor skal vi vælge dig, og hvad kan du bidrage med?</label>
-                <textarea id="bidrag" required></textarea>
-
-                <label>Har du tidligere erfaring som staff?</label>
-                <textarea id="erfaring" required></textarea>
-
-                <label>Er du tidligere blevet straffet på netværket?</label>
-                <textarea id="straffe" required></textarea>
-
-                <label>Er der andet vi bør vide?</label>
-                <textarea id="andet"></textarea>
-
-                <button type="button" class="btn" onclick="submitForm()">Send Ansøgning</button>
-                <button type="button" class="btn" style="background:#ff4757;" onclick="closeModal()">Luk</button>
-            </form>
+            <div id="fieldsContainer"></div>
+            <button class="btn" onclick="submitForm()">Send Ansøgning</button>
+            <button class="btn" style="background:#ff4757;" onclick="closeModal()">Luk</button>
         </div>
     </div>
 
     <script>
-        const webhookUrl = "DIN_WEBHOOK_URL_HER";
+        // --- KONFIGURATION ---
+        const webhookUrl = "INDSÆT_DIN_DISCORD_WEBHOOK_URL_HER";
         let currentType = "";
 
-        // Login logik
+        const formFields = {
+            'Hjælper': `
+                <label>Hvad er din alder?</label><input type="number" id="alder" required>
+                <label>Hvad hedder din minecraft account?</label><input type="text" id="mcNavn" required>
+                <label>Fortæl om dig selv</label><textarea id="omDig" required></textarea>
+                <label>Hvorfor skal vi vælge dig, og hvad kan du bidrage med?</label><textarea id="bidrag" required></textarea>
+                <label>Har du tidligere erfaring som staff?</label><textarea id="erfaring" required></textarea>
+                <label>Er du tidligere blevet straffet på netværket?</label><textarea id="straffe" required></textarea>
+                <label>Er der andet vi bør vide?</label><textarea id="andet"></textarea>
+            `,
+            'Unban': `
+                <label>Hvilken account er du bannet på?</label><input type="text" id="banAccount" required>
+                <label>Hvorfor modtog du ban?</label><textarea id="banGrund" required></textarea>
+                <label>Hvorfor skal vi unbanne dig?</label><textarea id="unbanGrund" required></textarea>
+            `,
+            'Content Creator': `
+                <label>Hvad er dit fornavn?</label><input type="text" id="fornavn" required>
+                <label>Hvad er dit minecraft navn?</label><input type="text" id="mcNavn" required>
+                <label>Hvad kan du bidrage med?</label><textarea id="bidrag" required></textarea>
+                <label>Link til din platform(e).</label><input type="text" id="platformLink" placeholder="Indsæt link her" required>
+                <label>Eventuelt link til dine forrige videoer / streams fra vores server af.</label><textarea id="gamleVideoer"></textarea>
+            `
+        };
+
+        // --- LOGIN LOGIK ---
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('code')) {
             localStorage.setItem('loggedIn', 'true');
             window.history.replaceState({}, document.title, window.location.pathname);
         }
-
         if (localStorage.getItem('loggedIn') === 'true') {
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('appSection').style.display = 'block';
         }
 
+        // --- MODAL LOGIK ---
         function openModal(type) {
             currentType = type;
             document.getElementById('modalTitle').innerText = type + " Ansøgning";
+            document.getElementById('fieldsContainer').innerHTML = formFields[type];
             document.getElementById('formModal').style.display = 'block';
         }
 
         function closeModal() { document.getElementById('formModal').style.display = 'none'; }
 
         async function submitForm() {
-            const data = {
-                type: currentType,
-                alder: document.getElementById('alder').value,
-                mc: document.getElementById('mcNavn').value,
-                omDig: document.getElementById('omDig').value,
-                bidrag: document.getElementById('bidrag').value,
-                erfaring: document.getElementById('erfaring').value,
-                straffe: document.getElementById('straffe').value,
-                andet: document.getElementById('andet').value
-            };
+            let content = `🚀 **Ny Ansøgning: ${currentType}**\n`;
+            const inputs = document.getElementById('fieldsContainer').querySelectorAll('input, textarea');
+            inputs.forEach(input => {
+                content += `\n**${input.previousElementSibling.innerText}**: ${input.value}`;
+            });
 
             await fetch(webhookUrl, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    content: `🚀 **Ny Ansøgning: ${data.type}**\n👤 Alder: ${data.alder}\n🎮 MC Navn: ${data.mc}\n📝 Om: ${data.omDig}\n💡 Bidrag: ${data.bidrag}\n🛠 Erfaring: ${data.erfaring}\n⚠️ Straffe: ${data.straffe}\n💬 Andet: ${data.andet}`
-                })
+                body: JSON.stringify({ content: content })
             });
 
-            alert("Tak! Din ansøgning er sendt.");
+            alert("Ansøgning sendt!");
             closeModal();
         }
     </script>
