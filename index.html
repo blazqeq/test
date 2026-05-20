@@ -18,7 +18,7 @@
 
     <div class="container" id="loginSection">
         <h1>Velkommen</h1>
-        <p>Log ind med Discord for at få adgang til vores ansøgningscenter.</p>
+        <p>Log ind med Discord for at få adgang.</p>
         <a href="https://discord.com/oauth2/authorize?client_id=1506775876447113236&response_type=code&redirect_uri=https%3A%2F%2Fblazqeq.github.io%2Ftest%2F&scope=identify" style="text-decoration:none;">
             <button class="btn">Log ind med Discord</button>
         </a>
@@ -35,41 +35,23 @@
         <div class="modal-content">
             <h2 id="modalTitle">Formular</h2>
             <div id="fieldsContainer"></div>
+            <label>Dit Discord Brugernavn (f.eks. Bruger#0000)</label>
+            <input type="text" id="discordUser" required placeholder="Dit Discord navn...">
             <button class="btn" onclick="submitForm()">Send Ansøgning</button>
             <button class="btn" style="background:#ff4757;" onclick="closeModal()">Luk</button>
         </div>
     </div>
 
     <script>
-        // --- KONFIGURATION ---
         const webhookUrl = "https://discord.com/api/webhooks/1506777158264029294/vCC4G5BGzWzbsSZIfC8L1xgsiCAA8UXQBWzbyTWEuujFb6VNbHRZzuUSAWiPeQdwzuUo";
         let currentType = "";
 
         const formFields = {
-            'Hjælper': `
-                <label>Hvad er din alder?</label><input type="number" id="alder" required>
-                <label>Hvad hedder din minecraft account?</label><input type="text" id="mcNavn" required>
-                <label>Fortæl om dig selv</label><textarea id="omDig" required></textarea>
-                <label>Hvorfor skal vi vælge dig, og hvad kan du bidrage med?</label><textarea id="bidrag" required></textarea>
-                <label>Har du tidligere erfaring som staff?</label><textarea id="erfaring" required></textarea>
-                <label>Er du tidligere blevet straffet på netværket?</label><textarea id="straffe" required></textarea>
-                <label>Er der andet vi bør vide?</label><textarea id="andet"></textarea>
-            `,
-            'Unban': `
-                <label>Hvilken account er du bannet på?</label><input type="text" id="banAccount" required>
-                <label>Hvorfor modtog du ban?</label><textarea id="banGrund" required></textarea>
-                <label>Hvorfor skal vi unbanne dig?</label><textarea id="unbanGrund" required></textarea>
-            `,
-            'Content Creator': `
-                <label>Hvad er dit fornavn?</label><input type="text" id="fornavn" required>
-                <label>Hvad er dit minecraft navn?</label><input type="text" id="mcNavn" required>
-                <label>Hvad kan du bidrage med?</label><textarea id="bidrag" required></textarea>
-                <label>Link til din platform(e).</label><input type="text" id="platformLink" placeholder="Indsæt link her" required>
-                <label>Eventuelt link til dine forrige videoer / streams fra vores server af.</label><textarea id="gamleVideoer"></textarea>
-            `
+            'Hjælper': `<label>Alder</label><input type="number" id="alder" required><label>MC Account</label><input type="text" id="mcNavn" required><label>Fortæl om dig selv</label><textarea id="omDig" required></textarea><label>Hvorfor vælge dig?</label><textarea id="bidrag" required></textarea><label>Staff erfaring</label><textarea id="erfaring" required></textarea><label>Straffe</label><textarea id="straffe" required></textarea><label>Andet</label><textarea id="andet"></textarea>`,
+            'Unban': `<label>Hvilken account?</label><input type="text" id="banAccount" required><label>Hvorfor modtog du ban?</label><textarea id="banGrund" required></textarea><label>Hvorfor unbanne dig?</label><textarea id="unbanGrund" required></textarea>`,
+            'Content Creator': `<label>Fornavn</label><input type="text" id="fornavn" required><label>MC Navn</label><input type="text" id="mcNavn" required><label>Hvad kan du bidrage med?</label><textarea id="bidrag" required></textarea><label>Platform link</label><input type="text" id="platformLink" required><label>Video/Stream links</label><textarea id="gamleVideoer"></textarea>`
         };
 
-        // --- LOGIN LOGIK ---
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('code')) {
             localStorage.setItem('loggedIn', 'true');
@@ -80,7 +62,6 @@
             document.getElementById('appSection').style.display = 'block';
         }
 
-        // --- MODAL LOGIK ---
         function openModal(type) {
             currentType = type;
             document.getElementById('modalTitle').innerText = type + " Ansøgning";
@@ -91,19 +72,32 @@
         function closeModal() { document.getElementById('formModal').style.display = 'none'; }
 
         async function submitForm() {
-            let content = `🚀 **Ny Ansøgning: ${currentType}**\n`;
-            const inputs = document.getElementById('fieldsContainer').querySelectorAll('input, textarea');
-            inputs.forEach(input => {
-                content += `\n**${input.previousElementSibling.innerText}**: ${input.value}`;
+            const discordUser = document.getElementById('discordUser').value;
+            const fields = document.getElementById('fieldsContainer').querySelectorAll('input, textarea');
+            let embedFields = [];
+            
+            fields.forEach(input => {
+                embedFields.push({ name: input.previousElementSibling.innerText, value: input.value || "Ikke angivet", inline: false });
             });
+
+            const payload = {
+                embeds: [{
+                    title: "🚀 Ny Ansøgning: " + currentType,
+                    color: 5814783,
+                    author: { name: discordUser || "Ukendt bruger" },
+                    fields: embedFields,
+                    footer: { text: "Indsendt via Ansøgnings Portal" },
+                    timestamp: new Date()
+                }]
+            };
 
             await fetch(webhookUrl, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ content: content })
+                body: JSON.stringify(payload)
             });
 
-            alert("Ansøgning sendt!");
+            alert("Ansøgning sendt som Embed!");
             closeModal();
         }
     </script>
