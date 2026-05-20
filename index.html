@@ -2,38 +2,48 @@
 <html lang="da">
 <head>
     <meta charset="UTF-8">
-    <title>Discord Login Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Velkommen | Discord Portal</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding-top: 50px; background: #2c2f33; color: white; }
-        .login-btn { background: #5865F2; padding: 15px 30px; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; }
+        body { background: #23272a; color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: #2c2f33; padding: 40px; border-radius: 15px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 300px; }
+        .login-btn { background: #5865F2; color: white; padding: 12px 25px; border-radius: 8px; text-decoration: none; font-weight: bold; transition: 0.3s; display: inline-block; }
+        .login-btn:hover { background: #4752c4; transform: scale(1.05); }
         #profile { display: none; }
-        img { border-radius: 50%; width: 100px; }
+        #avatar { width: 100px; border-radius: 50%; border: 3px solid #5865F2; margin-bottom: 15px; }
     </style>
 </head>
 <body>
 
-    <h1>Velkommen til min side</h1>
+    <div class="card">
+        <div id="login-view">
+            <h1>Velkommen</h1>
+            <p>Log ind for at fortsætte</p>
+            <br>
+            <a href="https://discord.com/oauth2/authorize?client_id=1506775876447113236&response_type=code&redirect_uri=https%3A%2F%2Fblazqeq.github.io%2Ftest%2F&scope=identify" class="login-btn">Discord Login</a>
+        </div>
 
-    <!-- Login knap -->
-    <a id="login-link" href="https://discord.com/oauth2/authorize?client_id=1506775876447113236&response_type=code&redirect_uri=https%3A%2F%2Fblazqeq.github.io%2Ftest%2F&scope=email+identify" class="login-btn">Log ind med Discord</a>
-
-    <!-- Profil visning (skjult som standard) -->
-    <div id="profile">
-        <img id="avatar" src="" alt="Logo">
-        <h2 id="username"></h2>
+        <div id="profile">
+            <img id="avatar" src="" alt="Avatar">
+            <h2 id="username"></h2>
+            <p style="color: #99aab5;">Du er nu logget ind!</p>
+        </div>
     </div>
 
     <script>
-        // Tjekker om der er en 'code' i URL'en
+        // Tjek URL for 'code'
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
 
         if (code) {
-            document.getElementById('login-link').style.display = 'none';
-            document.getElementById('profile').style.display = 'block';
-            document.getElementById('username').innerText = "Velkommen, Discord bruger!";
-            // Bemærk: For at få rigtigt navn/billede skal du bruge en backend (Node.js/Python) 
-            // til at bytte 'code' til et 'token'.
+            document.getElementById('login-view').innerHTML = "<h3>Logger ind...</h3>";
+            
+            // HER SKAL DU BRUGE EN BACKEND/PROXY. 
+            // Da du er på GitHub Pages, er det nemmeste at bruge en "Discord OAuth Proxy" 
+            // eller en simpel Cloudflare Worker.
+            
+            console.log("Vi har modtaget koden: " + code);
+            // Efter validering vil du normalt modtage brugerdata her.
         }
     </script>
 </body>
