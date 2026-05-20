@@ -2,31 +2,33 @@
 <html lang="da">
 <head>
     <meta charset="UTF-8">
-    <title>Ansøgnings Center</title>
+    <title>Ansøgnings System | Pro</title>
     <style>
         body { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
         .container { background: rgba(255, 255, 255, 0.05); padding: 40px; border-radius: 20px; backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); text-align: center; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5); width: 400px; }
-        .profile { margin-bottom: 20px; }
-        .avatar { width: 64px; height: 64px; border-radius: 50%; border: 2px solid #5865F2; }
+        .profile { margin-bottom: 25px; display: flex; flex-direction: column; align-items: center; }
+        .avatar { width: 80px; height: 80px; border-radius: 50%; border: 3px solid #5865F2; margin-bottom: 10px; }
         .btn { padding: 12px 25px; margin: 10px; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; transition: 0.3s; background: #5865F2; color: white; width: 100%; }
         .btn:hover { background: #4752C4; transform: scale(1.02); }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); overflow-y: auto; }
         .modal-content { background: #252a34; width: 450px; margin: 5% auto; padding: 30px; border-radius: 15px; border: 1px solid #5865F2; text-align: left; }
         input, textarea { width: 100%; margin: 8px 0 15px 0; padding: 10px; border-radius: 8px; border: 1px solid #444; background: #1a1a2e; color: white; box-sizing: border-box; }
+        label { font-weight: bold; font-size: 0.9em; display: block; margin-top: 10px; }
     </style>
 </head>
 <body>
 
     <div class="container" id="loginSection">
         <h1>Velkommen</h1>
-        <a href="https://discord.com/oauth2/authorize?client_id=1506775876447113236&response_type=code&redirect_uri=https%3A%2F%2Fblazqeq.github.io%2Ftest%2F&scope=identify">
+        <p>Log ind med Discord for at ansøge.</p>
+        <a href="https://discord.com/oauth2/authorize?client_id=1506775876447113236&response_type=code&redirect_uri=https%3A%2F%2Fblazqeq.github.io%2Ftest%2F&scope=identify" style="text-decoration:none;">
             <button class="btn">Log ind med Discord</button>
         </a>
     </div>
 
     <div class="container" id="appSection" style="display:none;">
         <div class="profile">
-            <img id="userAvatar" class="avatar" src="" alt="Avatar">
+            <img id="userAvatar" class="avatar" src="">
             <h2 id="userName">...</h2>
         </div>
         <button class="btn" onclick="openModal('Hjælper')">Hjælper Ansøgning</button>
@@ -48,21 +50,25 @@
         let userData = null;
         let currentType = "";
 
-        // OAuth2 flow: Hent brugerdata fra en proxy (Brug f.eks. "discord-oauth2-proxy" på Vercel)
+        const formFields = {
+            'Hjælper': `<label>Alder</label><input type="number" id="alder" required><label>MC Account</label><input type="text" id="mcNavn" required><label>Fortæl om dig selv</label><textarea id="omDig" required></textarea><label>Hvorfor vælge dig?</label><textarea id="bidrag" required></textarea><label>Staff erfaring</label><textarea id="erfaring" required></textarea><label>Straffe</label><textarea id="straffe" required></textarea><label>Andet</label><textarea id="andet"></textarea>`,
+            'Unban': `<label>Hvilken account?</label><input type="text" id="banAccount" required><label>Hvorfor modtog du ban?</label><textarea id="banGrund" required></textarea><label>Hvorfor unbanne dig?</label><textarea id="unbanGrund" required></textarea>`,
+            'Content Creator': `<label>Fornavn</label><input type="text" id="fornavn" required><label>MC Navn</label><input type="text" id="mcNavn" required><label>Hvad kan du bidrage med?</label><textarea id="bidrag" required></textarea><label>Platform link</label><input type="text" id="platformLink" required><label>Video links</label><textarea id="gamleVideoer"></textarea>`
+        };
+
+        // Hent brugerdata via Proxy
         const code = new URLSearchParams(window.location.search).get('code');
         if (code) {
-            // HER SKAL DU KALDE DIN BACKEND PROXY
-            // For at gøre det nemt nu: Vi simulerer at vi har hentet dataen
-            document.getElementById('loginSection').style.display = 'none';
-            document.getElementById('appSection').style.display = 'block';
-            document.getElementById('userName').innerText = "Discord Bruger";
+            fetch('/api/discord-user?code=' + code)
+                .then(res => res.json())
+                .then(user => {
+                    userData = user;
+                    document.getElementById('userName').innerText = user.username;
+                    document.getElementById('userAvatar').src = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('appSection').style.display = 'block';
+                });
         }
-
-        const formFields = {
-            'Hjælper': `<label>Alder</label><input type="number" id="alder" required><label>MC Account</label><input type="text" id="mcNavn" required><label>Fortæl om dig selv</label><textarea id="omDig" required></textarea><label>Hvorfor vælge dig?</label><textarea id="bidrag" required></textarea><label>Staff erfaring</label><textarea id="erfaring" required></textarea><label>Straffe</label><textarea id="straffe" required></textarea>`,
-            'Unban': `<label>Hvilken account?</label><input type="text" id="banAccount" required><label>Hvorfor modtog du ban?</label><textarea id="banGrund" required></textarea><label>Hvorfor unbanne dig?</label><textarea id="unbanGrund" required></textarea>`,
-            'Content Creator': `<label>Fornavn</label><input type="text" id="fornavn" required><label>MC Navn</label><input type="text" id="mcNavn" required><label>Bidrag</label><textarea id="bidrag" required></textarea><label>Platform link</label><input type="text" id="platformLink" required><label>Video links</label><textarea id="gamleVideoer"></textarea>`
-        };
 
         function openModal(type) {
             currentType = type;
@@ -71,6 +77,8 @@
             document.getElementById('formModal').style.display = 'block';
         }
 
+        function closeModal() { document.getElementById('formModal').style.display = 'none'; }
+
         async function submitForm() {
             const fields = document.getElementById('fieldsContainer').querySelectorAll('input, textarea');
             let embedFields = [];
@@ -78,20 +86,23 @@
                 embedFields.push({ name: f.previousElementSibling.innerText, value: f.value || "-", inline: false });
             });
 
+            const payload = {
+                embeds: [{
+                    title: "🚀 Ny Ansøgning: " + currentType,
+                    color: 5814783,
+                    author: { name: userData.username, icon_url: `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png` },
+                    fields: embedFields,
+                    footer: { text: "ID: " + userData.id },
+                    timestamp: new Date()
+                }]
+            };
+
             await fetch(webhookUrl, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    embeds: [{
-                        title: "🚀 Ny Ansøgning: " + currentType,
-                        color: 5814783,
-                        author: { name: document.getElementById('userName').innerText },
-                        fields: embedFields,
-                        footer: { text: "Indsendt via Portal" },
-                        timestamp: new Date()
-                    }]
-                })
+                body: JSON.stringify(payload)
             });
+
             alert("Ansøgning sendt!");
             closeModal();
         }
