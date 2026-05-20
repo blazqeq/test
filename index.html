@@ -30,13 +30,27 @@
 </div>
 
 <script>
-    function logout() {
-        localStorage.clear();
-        window.location.href = "https://blazqeq.github.io/test/";
+    // 1. Tjek om vi er kommet tilbage fra Discord med en 'code'
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+
+    if (code) {
+        // Her ville man normalt kontakte en backend. 
+        // Da du er på GitHub Pages, kan du bruge en gratis service som 'Discord OAuth2 Proxy'
+        // eller bare simulere det for at se designet virke:
+        
+        console.log("Vi har modtaget en kode: " + code);
+        
+        // --- SIMULERING (da vi ikke har backend endnu) ---
+        // I en rigtig app ville du sende 'code' til din server her.
+        // Vi gemmer bare at vi er logget ind for testens skyld:
+        const mockUser = { username: "DiscordBruger", id: "12345", avatar: "a_..." };
+        localStorage.setItem('user', JSON.stringify(mockUser));
+        
+        // Ryd URL'en så koden forsvinder
+        window.history.replaceState({}, document.title, window.location.pathname);
+        location.reload(); 
     }
-    
-    // Her ville logikken til at parse URL'en og vise data ligge
-    // Efter du har modtaget koden fra Discord
 </script>
 </body>
 </html>
