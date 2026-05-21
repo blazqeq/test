@@ -2,47 +2,71 @@
 <html lang="da">
 <head>
     <meta charset="UTF-8">
-    <title>Overraskelse!</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jajaj Flyver</title>
     <style>
-        body { background-color: #000; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        
-        #btn-container { text-align: center; }
-
-        .glow-btn {
-            padding: 20px 40px; font-size: 24px; color: #ff0055; background: transparent;
-            border: 2px solid #ff0055; border-radius: 50px; cursor: pointer;
-            box-shadow: 0 0 10px #ff0055, inset 0 0 10px #ff0055;
-            transition: 0.3s;
+        /* Grundlæggende styling */
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background: linear-gradient(135deg, #1e1e2f, #2d2d44);
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        .glow-btn:hover { background: #ff0055; color: #fff; box-shadow: 0 0 40px #ff0055; }
+        /* Den flyvende container */
+        .flyvende-billede {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            animation: flyv 10s linear infinite alternate;
+        }
 
-        /* Skjult container til videoen */
-        #video-container { display: none; width: 80%; max-width: 800px; aspect-ratio: 16/9; }
-        iframe { width: 100%; height: 100%; border: none; }
+        .flyvende-billede img {
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 3px solid #00d4ff;
+        }
+
+        /* Animationen der flyver rundt */
+        @keyframes flyv {
+            0% { top: 10%; left: 10%; }
+            25% { top: 10%; left: 80%; }
+            50% { top: 80%; left: 80%; }
+            75% { top: 80%; left: 10%; }
+            100% { top: 10%; left: 10%; }
+        }
+
+        /* Moderne tekstboks */
+        .content {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: center;
+            z-index: 10;
+        }
+
+        h1 { margin: 0; font-size: 3rem; text-transform: uppercase; letter-spacing: 5px; }
     </style>
 </head>
 <body>
 
-    <div id="btn-container">
-        <button class="glow-btn" onclick="startRickRoll()">Klik her for en gave!</button>
+    <div class="flyvende-billede">
+        <img src="billede.png" alt="Jajaj">
     </div>
 
-    <div id="video-container">
-        <!-- Vi tilføjer ?autoplay=1 for at starte videoen med det samme -->
-        <iframe id="rick-video" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <div class="content">
+        <h1>JAJAJ</h1>
+        <p>Velkommen til det moderne jajaj-univers</p>
     </div>
-
-    <script>
-        function startRickRoll() {
-            // Skjul knappen
-            document.getElementById('btn-container').style.display = 'none';
-            // Vis video-containeren
-            document.getElementById('video-container').style.display = 'block';
-            // Sæt kilden til videoen med autoplay
-            document.getElementById('rick-video').src = "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1";
-        }
-    </script>
 
 </body>
 </html>
