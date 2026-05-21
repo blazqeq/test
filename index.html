@@ -14,22 +14,16 @@
             background: #0f172a;
             color: #f8fafc;
             font-family: 'Inter', sans-serif;
-            overflow: hidden;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             gap: 2rem;
+            overflow-x: hidden;
         }
 
-        /* Container til knapperne */
-        .knap-container {
-            display: flex;
-            gap: 20px;
-            z-index: 10;
-        }
+        .knap-container { display: flex; gap: 20px; z-index: 10; }
 
-        /* Styling for begge knapper */
         .knap {
             padding: 1.2rem 2.5rem;
             background: transparent;
@@ -40,51 +34,38 @@
             font-weight: bold;
             font-size: 1.2rem;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            cursor: pointer;
             box-shadow: 0 0 15px #00d4ff, inset 0 0 10px #00d4ff;
             transition: 0.3s;
         }
 
-        .knap:hover {
-            background: #00d4ff;
-            color: #0f172a;
-            box-shadow: 0 0 30px #00d4ff;
-            cursor: pointer;
+        .knap:hover { background: #00d4ff; color: #0f172a; box-shadow: 0 0 30px #00d4ff; }
+
+        /* Videofelt (skjult som standard) */
+        #video-container {
+            display: none;
+            width: 80%;
+            max-width: 600px;
+            margin-top: 20px;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 2px solid #00d4ff;
+            box-shadow: 0 0 20px #00d4ff;
         }
 
-        /* Cirkulær bane (uændret) */
+        video { width: 100%; display: block; }
+
+        /* Animationer (uændret) */
         .cirkel-bane {
             position: absolute;
-            width: 300px;
-            height: 300px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            animation: rotateFull 10s linear infinite;
-            pointer-events: none; /* Gør at man kan klikke gennem cirklen */
+            width: 300px; height: 300px;
+            display: flex; justify-content: center; align-items: center;
+            animation: rotateFull 10s linear infinite; pointer-events: none;
         }
-
-        .flyvende-container {
-            width: 120px;
-            animation: counterRotate 10s linear infinite;
-        }
-
-        .flyvende-container img {
-            width: 100%;
-            border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-            border: 2px solid rgba(255,255,255,0.2);
-        }
-
-        @keyframes rotateFull {
-            from { transform: rotate(0deg) translateX(200px) rotate(0deg); }
-            to { transform: rotate(360deg) translateX(200px) rotate(-360deg); }
-        }
-
-        @keyframes counterRotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(-360deg); }
-        }
+        .flyvende-container { width: 120px; animation: counterRotate 10s linear infinite; }
+        .flyvende-container img { width: 100%; border-radius: 24px; }
+        @keyframes rotateFull { from { transform: rotate(0deg) translateX(200px) rotate(0deg); } to { transform: rotate(360deg) translateX(200px) rotate(-360deg); } }
+        @keyframes counterRotate { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
     </style>
 </head>
 <body>
@@ -97,8 +78,22 @@
 
     <div class="knap-container">
         <a href="https://discord.gg/8bpU9VMWhM" class="knap">JOIN DISCORD</a>
-        <a href="mcblocked.mp4" class="knap" target="_blank">SE TRAILER</a>
+        <button class="knap" onclick="visVideo()">SE TRAILER</button>
     </div>
+
+    <div id="video-container">
+        <video controls>
+            <source src="mcblocked.mp4" type="video/mp4">
+            Din browser understøtter ikke video-tagget.
+        </video>
+    </div>
+
+    <script>
+        function visVideo() {
+            const container = document.getElementById('video-container');
+            container.style.display = 'block';
+        }
+    </script>
 
 </body>
 </html>
