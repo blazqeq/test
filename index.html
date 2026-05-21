@@ -2,51 +2,47 @@
 <html lang="da">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Player</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Login Test</title>
     <style>
-        body { 
-            margin: 0; background: #020617; 
-            display: flex; justify-content: center; align-items: center; 
-            height: 100vh; font-family: 'Inter', sans-serif;
-        }
-
-        /* Container med "Glow" effekt */
-        .video-wrapper {
-            position: relative;
-            padding: 10px;
-            background: linear-gradient(135deg, #4f46e5, #ec4899);
-            border-radius: 24px;
-            box-shadow: 0 0 50px rgba(79, 70, 229, 0.3);
-            transition: transform 0.3s ease;
-        }
-        .video-wrapper:hover { transform: scale(1.02); }
-
-        /* Selve video-rammen */
-        iframe {
-            border-radius: 18px;
-            display: block;
-        }
-
-        /* Dekorativ tekst */
-        .info {
-            position: absolute; bottom: -50px; left: 0; width: 100%;
-            text-align: center; color: #94a3b8; font-weight: 500;
-        }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background-color: #0f172a; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; }
+        .glow-btn { padding: 12px 30px; font-size: 1rem; font-weight: 600; color: white; background: transparent; border: 2px solid #38bdf8; border-radius: 50px; cursor: pointer; transition: all 0.3s ease; text-decoration: none; }
+        .glow-btn:hover { background: #38bdf8; box-shadow: 0 0 20px #38bdf8; }
+        #user-info { display: none; text-align: center; }
+        #user-avatar { border-radius: 50%; width: 100px; border: 3px solid #38bdf8; }
     </style>
 </head>
 <body>
 
-    <div class="video-wrapper">
-        <iframe 
-            width="800" height="450" 
-            src="https://www.youtube.com/embed/QRNzvG2CiOw" 
-            title="YouTube video player" 
-            frameborder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-            allowfullscreen>
-        </iframe>
-        <div class="info"></div>
+    <div id="login-section">
+        <h1>Velkommen</h1>
+        <a href="https://discord.com/oauth2/authorize?client_id=1506775876447113236&response_type=code&redirect_uri=https%3A%2F%2Fblazqeq.github.io%2Ftest%2F&scope=identify" class="glow-btn">Log ind med Discord</a>
     </div>
 
+    <div id="user-info">
+        <img id="user-avatar" src="" alt="Avatar">
+        <h2 id="user-name"></h2>
+        <p>Du er nu logget ind!</p>
+    </div>
+
+    <script>
+        // Tjekker om der er en 'code' i URL'en når siden loader
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+
+        if (code) {
+            // Skjul login knap
+            document.getElementById('login-section').style.display = 'none';
+            // Vis bruger-info boks
+            document.getElementById('user-info').style.display = 'block';
+            document.getElementById('user-name').innerText = "Forbinder til Discord...";
+            
+            console.log("Vi har modtaget koden:", code);
+            
+            // HER SKAL DIN BACKEND LOGIK VÆRE:
+            // Du skal nu sende 'code' til en server (f.eks. Cloudflare Worker), 
+            // som bytter den til en token og henter profilinfo.
+        }
+    </script>
 </body>
 </html>
