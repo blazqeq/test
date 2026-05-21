@@ -2,58 +2,47 @@
 <html lang="da">
 <head>
     <meta charset="UTF-8">
-    <title>Modern Secure Chat</title>
-    <!-- Vi henter Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
-    
+    <title>Overraskelse!</title>
     <style>
-        /* Samme moderne design som før */
-        :root { --glow-color: #00d4ff; --bg-color: #0f172a; }
-        body { background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); color: white; height: 100vh; display: flex; justify-content: center; align-items: center; margin: 0; font-family: sans-serif; }
-        .glass-panel { width: 450px; background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(10px); padding: 30px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
-        .glow-btn { background: transparent; border: 2px solid var(--glow-color); color: var(--glow-color); padding: 12px 25px; border-radius: 50px; cursor: pointer; transition: 0.4s; font-weight: bold; }
-        .glow-btn:hover { background: var(--glow-color); color: var(--bg-color); box-shadow: 0 0 20px var(--glow-color); }
-        #chat-ui { display: none; }
+        body { background-color: #000; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        
+        #btn-container { text-align: center; }
+
+        .glow-btn {
+            padding: 20px 40px; font-size: 24px; color: #ff0055; background: transparent;
+            border: 2px solid #ff0055; border-radius: 50px; cursor: pointer;
+            box-shadow: 0 0 10px #ff0055, inset 0 0 10px #ff0055;
+            transition: 0.3s;
+        }
+
+        .glow-btn:hover { background: #ff0055; color: #fff; box-shadow: 0 0 40px #ff0055; }
+
+        /* Skjult container til videoen */
+        #video-container { display: none; width: 80%; max-width: 800px; aspect-ratio: 16/9; }
+        iframe { width: 100%; height: 100%; border: none; }
     </style>
 </head>
 <body>
 
-<div class="glass-panel">
-    <div id="login-ui">
-        <h2>Log ind for at chatte</h2>
-        <button class="glow-btn" onclick="googleLogin()">Log ind med Google</button>
+    <div id="btn-container">
+        <button class="glow-btn" onclick="startRickRoll()">Klik her for en gave!</button>
     </div>
 
-    <div id="chat-ui">
-        <h3 id="user-display"></h3>
-        <div id="messages" style="height: 200px; overflow-y: auto; text-align: left; margin-bottom: 15px;"></div>
-        <input type="text" id="msgInput" placeholder="Besked..." style="width: 100%; padding: 10px; border-radius: 8px; border: none;">
+    <div id="video-container">
+        <!-- Vi tilføjer ?autoplay=1 for at starte videoen med det samme -->
+        <iframe id="rick-video" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
     </div>
-</div>
 
-<script>
-    // 1. Her indsætter du din Firebase konfiguration (fra Firebase Dashboard)
-    const firebaseConfig = {
-        apiKey: "DIN_API_KEY",
-        authDomain: "DIT_PROJEKT.firebaseapp.com",
-        projectId: "DIT_PROJEKT"
-    };
-    firebase.initializeApp(firebaseConfig);
-
-    const provider = new firebase.auth.GoogleAuthProvider();
-
-    function googleLogin() {
-        firebase.auth().signInWithPopup(provider).then((result) => {
-            const user = result.user;
-            document.getElementById('user-display').innerText = "Logget ind som: " + user.displayName;
-            document.getElementById('login-ui').style.display = 'none';
-            document.getElementById('chat-ui').style.display = 'block';
-        }).catch((error) => {
-            alert("Login fejlede: " + error.message);
-        });
-    }
-</script>
+    <script>
+        function startRickRoll() {
+            // Skjul knappen
+            document.getElementById('btn-container').style.display = 'none';
+            // Vis video-containeren
+            document.getElementById('video-container').style.display = 'block';
+            // Sæt kilden til videoen med autoplay
+            document.getElementById('rick-video').src = "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1";
+        }
+    </script>
 
 </body>
 </html>
