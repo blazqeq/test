@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>McBlocked</title>
-    <link rel="icon" href="blocked2.png" type="image/png">
+    <link rel="icon" href="blocked.png" type="image/png">
     
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -16,11 +16,43 @@
             font-family: 'Inter', sans-serif;
             overflow: hidden;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
+            gap: 2rem;
         }
 
-        /* Cirkulær bane */
+        /* Container til knapperne */
+        .knap-container {
+            display: flex;
+            gap: 20px;
+            z-index: 10;
+        }
+
+        /* Styling for begge knapper */
+        .knap {
+            padding: 1.2rem 2.5rem;
+            background: transparent;
+            color: #00d4ff;
+            border: 2px solid #00d4ff;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 0 15px #00d4ff, inset 0 0 10px #00d4ff;
+            transition: 0.3s;
+        }
+
+        .knap:hover {
+            background: #00d4ff;
+            color: #0f172a;
+            box-shadow: 0 0 30px #00d4ff;
+            cursor: pointer;
+        }
+
+        /* Cirkulær bane (uændret) */
         .cirkel-bane {
             position: absolute;
             width: 300px;
@@ -29,6 +61,7 @@
             justify-content: center;
             align-items: center;
             animation: rotateFull 10s linear infinite;
+            pointer-events: none; /* Gør at man kan klikke gennem cirklen */
         }
 
         .flyvende-container {
@@ -52,30 +85,6 @@
             from { transform: rotate(0deg); }
             to { transform: rotate(-360deg); }
         }
-
-        /* Glowing knap styling */
-        .discord-knap {
-            padding: 1.2rem 2.5rem;
-            background: transparent;
-            color: #00d4ff;
-            border: 2px solid #00d4ff;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 1.2rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            box-shadow: 0 0 15px #00d4ff, inset 0 0 10px #00d4ff;
-            transition: 0.3s;
-            z-index: 10;
-        }
-
-        .discord-knap:hover {
-            background: #00d4ff;
-            color: #0f172a;
-            box-shadow: 0 0 30px #00d4ff;
-            cursor: pointer;
-        }
     </style>
 </head>
 <body>
@@ -86,7 +95,10 @@
         </div>
     </div>
 
-    <a href="https://discord.gg/8bpU9VMWhM" class="discord-knap">JOIN DISCORD</a>
+    <div class="knap-container">
+        <a href="https://discord.gg/8bpU9VMWhM" class="knap">JOIN DISCORD</a>
+        <a href="mcblocked.mp4" class="knap" target="_blank">SE TRAILER</a>
+    </div>
 
 </body>
 </html>
