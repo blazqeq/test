@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ViggoMagiccc | Live</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --twitch-purple: #9146ff;
+            --bg-color: #0e0e10;
+            --card-bg: #18181b;
+            --text-color: #efeff1;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        h1 { margin-bottom: 30px; letter-spacing: -1px; }
+
+        .content-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        /* Container styling med lækker shadow */
+        .box {
+            background-color: var(--card-bg);
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            overflow: hidden;
+            border: 1px solid #333;
+        }
+
+        #twitch-embed {
+            width: 620px;
+            height: 378px;
+        }
+
+        .chat-container {
+            width: 400px;
+            height: 378px;
+        }
+
+        .chat-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Moderne knap design */
+        .twitch-btn {
+            margin-top: 40px;
+            padding: 15px 40px;
+            background-color: var(--twitch-purple);
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .twitch-btn:hover {
+            background-color: #772ce8;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(145, 70, 255, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>ViggoMagiccc <span style="color: var(--twitch-purple);">LIVE</span></h1>
+
+    <div class="content-wrapper">
+        <div class="box">
+            <div id="twitch-embed"></div>
+        </div>
+
+        <div class="box chat-container">
+            <iframe src="https://chatis.is2511.com/v2/?channel=viggomagiccc&animate=true&bots=true&fade=30&size=1&font=11&shadow=1"></iframe>
+        </div>
+    </div>
+
+    <a href="https://www.twitch.tv/viggomagiccc" class="twitch-btn" target="_blank">
+        Besøg Twitch Kanal
+    </a>
+
+    <script src="https://player.twitch.tv/js/embed/v1.js"></script>
+    <script type="text/javascript">
+      new Twitch.Player("twitch-embed", {
+        channel: "viggomagiccc",
+        width: "100%",
+        height: "100%"
+      });
+    </script>
+
+</body>
+</html>
