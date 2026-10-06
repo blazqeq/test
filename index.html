@@ -23,30 +23,40 @@
         .fade-in { animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        #search-screen { text-align: center; width: 100%; transition: all 0.5s ease; }
+        #search-screen { text-align: center; width: 100%; transition: all 0.5s ease; padding: 20px; }
         
         /* Skjul stream containeren fra start */
         #stream-screen { display: none; width: 95%; max-width: 1200px; }
+
+        .input-group { display: flex; flex-direction: column; align-items: center; gap: 15px; max-width: 400px; margin: 0 auto; }
         
-        .input-group { display: flex; justify-content: center; gap: 10px; }
         input { 
-            padding: 15px 20px; width: 300px; border-radius: 8px; border: 2px solid #333; 
+            padding: 15px 20px; width: 100%; border-radius: 8px; border: 2px solid #333; 
             background: #222; color: white; font-size: 1rem; outline: none; transition: border 0.3s;
+            box-sizing: border-box;
         }
         input:focus { border-color: var(--twitch-purple); }
-        
+
         button { 
             padding: 15px 30px; background-color: var(--twitch-purple); color: white; 
-            border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: transform 0.2s, background 0.3s;
+            border: none; border-radius: 8px; cursor: pointer; font-weight: 600; 
+            transition: transform 0.2s, background 0.3s; width: 100%; font-size: 1rem;
         }
         button:hover { background-color: #772ce8; transform: translateY(-2px); }
 
         .content-wrapper { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
-        #twitch-embed { width: 70%; aspect-ratio: 16 / 9; background: #000; border-radius: 12px; overflow: hidden; }
-        .chat-container { width: 25%; min-width: 300px; height: 500px; background: var(--card-bg); border-radius: 12px; overflow: hidden; }
-        .chat-container iframe { width: 100%; height: 100%; border: none; }
+        #twitch-embed { width: 70%; aspect-ratio: 16 / 9; background: #000; border-radius: 12px; overflow: hidden; min-width: 300px; flex-grow: 1; }
         
-        .back-btn { margin-top: 20px; background: #333; }
+        .chat-container { width: 28%; min-width: 300px; height: 500px; background: var(--card-bg); border-radius: 12px; overflow: hidden; flex-grow: 1; }
+        .chat-container iframe { width: 100%; height: 100%; border: none; }
+
+        .back-btn { margin-top: 20px; background: #333; width: auto; }
+        
+        .login-tip {
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: #aaa;
+        }
     </style>
 </head>
 <body>
@@ -55,7 +65,8 @@
         <h1>Twitch <span style="color: var(--twitch-purple);">Viewer</span></h1>
         <div class="input-group">
             <input type="text" id="channelInput" placeholder="Indtast Twitch navn..." autocomplete="off">
-            <button onclick="startStream()">Søg</button>
+            <button onclick="startStream()">Start Stream & Chat</button>
+            <div class="login-tip">💡 Du kan logge ind direkte i Twitch-chatten når streamen starter for at skrive med.</div>
         </div>
     </div>
 
@@ -63,6 +74,7 @@
         <div class="content-wrapper">
             <div id="twitch-embed"></div>
             <div class="chat-container">
+                <!-- Bruger Twitchs officielle indlejrede chat, som tillader login -->
                 <iframe id="chat-embed" src="" scrolling="yes"></iframe>
             </div>
         </div>
@@ -79,7 +91,7 @@
         input.addEventListener("keypress", (e) => { if (e.key === "Enter") startStream(); });
 
         function startStream() {
-            const channel = input.value.trim();
+            const channel = input.value.trim().toLowerCase();
             if (!channel) return;
 
             document.getElementById('search-screen').style.display = 'none';
@@ -90,9 +102,17 @@
                 player.destroy();
             }
 
-            player = new Twitch.Player("twitch-embed", { channel: channel, width: "100%", height: "100%" });
-            document.getElementById('chat-embed').src = 
-                `https://chatis.is2511.com/v2/?channel=${channel}&animate=true&bots=true&fade=30&size=1&font=11&shadow=1`;
+            // Start Twitch video afspilleren
+            player = new Twitch.Player("twitch-embed", { 
+                channel: channel, 
+                width: "100%", 
+                height: "100%",
+                parent: [window.location.hostname || "localhost"]
+            });
+
+            // Sæt Twitchs officielle chat ind (kræver 'parent' parameter for at virke korrekt på domæner)
+            const parentDomain = window.location.hostname || "localhost";
+            document.getElementById('chat-embed').src = `https://www.twitch.tv/embed/${channel}/chat?parent=${parentDomain}`;
         }
 
         function resetSearch() {
