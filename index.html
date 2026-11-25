@@ -1,0 +1,354 @@
+
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SuperAwesome Player Lookup</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #0b0d14;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+    padding: 40px 20px;
+}
+
+.container {
+    max-width: 700px;
+    margin: auto;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 35px;
+}
+
+.header h1 {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.header p {
+    color: #858ba1;
+}
+
+.search-box {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    background: #171a27;
+    border: 1px solid #292d40;
+    border-radius: 12px;
+}
+
+.search-box input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: white;
+    padding: 12px;
+    font-size: 15px;
+}
+
+.search-box button {
+    background: #7164ed;
+    border: none;
+    color: white;
+    padding: 12px 22px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.search-box button:hover {
+    background: #887cff;
+}
+
+#status {
+    text-align: center;
+    margin: 25px 0;
+    color: #9298ac;
+}
+
+.section-title {
+    font-size: 16px;
+    margin: 25px 0 12px;
+    color: #aeb4c9;
+}
+
+.player-card {
+    background: #171a27;
+    border: 1px solid #292d40;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    animation: appear .25s ease;
+}
+
+.player-card.banned-card {
+    border-color: #653333;
+}
+
+.player-card h2 {
+    font-size: 19px;
+    margin-bottom: 12px;
+}
+
+.player-card p {
+    color: #a4a9bb;
+    font-size: 13px;
+    margin-top: 8px;
+    overflow-wrap: anywhere;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 6px 11px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-top: 14px;
+}
+
+.not-banned {
+    color: #50df9b;
+    background: #143b2c;
+}
+
+.is-banned {
+    color: #ff6464;
+    background: #421e25;
+}
+
+.unknown {
+    color: #e5bd69;
+    background: #40351d;
+}
+
+.empty {
+    color: #777e93;
+    text-align: center;
+    padding: 25px;
+    background: #171a27;
+    border-radius: 12px;
+}
+
+@keyframes appear {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>Player Lookup</h1>
+        <p>SuperAwesome Discord Player Database</p>
+    </div>
+
+    <div class="search-box">
+        <input
+            id="discordId"
+            type="text"
+            placeholder="Enter Discord ID..."
+            autocomplete="off"
+        >
+        <button onclick="searchPlayer()">Search</button>
+    </div>
+
+    <div id="status"></div>
+
+    <div id="normalPlayers"></div>
+    <div id="bannedPlayers"></div>
+
+</div>
+
+<script>
+
+const input = document.getElementById("discordId");
+const statusText = document.getElementById("status");
+const normalPlayers = document.getElementById("normalPlayers");
+const bannedPlayers = document.getElementById("bannedPlayers");
+
+input.addEventListener("keydown", event => {
+    if (event.key === "Enter") {
+        searchPlayer();
+    }
+});
+
+async function searchPlayer() {
+
+    const discordId = input.value.trim();
+
+    if (!/^\d+$/.test(discordId)) {
+        statusText.textContent = "Please enter a valid Discord ID.";
+        return;
+    }
+
+    normalPlayers.innerHTML = "";
+    bannedPlayers.innerHTML = "";
+
+    statusText.textContent = "Loading players...";
+
+    try {
+
+        const response = await fetch(
+            `https://api.superawesome.dk/players/${encodeURIComponent(discordId)}?type=discord`
+        );
+
+        if (!response.ok) {
+            throw new Error("API Error: " + response.status);
+        }
+
+        const result = await response.json();
+
+        // API kan returnere en liste eller ét player-objekt.
+        const players = Array.isArray(result)
+            ? result
+            : Array.isArray(result.players)
+                ? result.players
+                : [result];
+
+        // Sortering:
+        // 1. Banned False
+        // 2. Unknown
+        // 3. Banned True
+
+        players.sort((a, b) => {
+            const order = value =>
+                value.banned === false ? 0 :
+                value.banned === true ? 2 : 1;
+
+            return order(a) - order(b);
+        });
+
+        const safePlayers = players.filter(p => p.banned === false);
+        const unknownPlayers = players.filter(
+            p => p.banned !== true && p.banned !== false
+        );
+        const banned = players.filter(p => p.banned === true);
+
+        function createCard(player) {
+
+            const card = document.createElement("div");
+
+            card.className = "player-card";
+
+            if (player.banned === true) {
+                card.classList.add("banned-card");
+            }
+
+            const username = document.createElement("h2");
+            username.textContent = player.username || "Unknown Username";
+
+            const discord = document.createElement("p");
+            discord.textContent = "Discord ID: " + discordId;
+
+            const uuid = document.createElement("p");
+            uuid.textContent = "UUID: " + (player.uuid || "Unknown");
+
+            const badge = document.createElement("span");
+            badge.className = "status-badge";
+
+            if (player.banned === true) {
+                badge.textContent = "BANNED";
+                badge.classList.add("is-banned");
+            } else if (player.banned === false) {
+                badge.textContent = "IKKE BANNET";
+                badge.classList.add("not-banned");
+            } else {
+                badge.textContent = "BANNED: UNKNOWN";
+                badge.classList.add("unknown");
+            }
+
+            card.appendChild(username);
+            card.appendChild(discord);
+            card.appendChild(uuid);
+            card.appendChild(document.createElement("br"));
+            card.appendChild(badge);
+
+            return card;
+        }
+
+        // Ikke banned først
+        if (safePlayers.length > 0) {
+
+            const title = document.createElement("h3");
+            title.className = "section-title";
+            title.textContent = `Not Banned (${safePlayers.length})`;
+
+            normalPlayers.appendChild(title);
+
+            safePlayers.forEach(player => {
+                normalPlayers.appendChild(createCard(player));
+            });
+        }
+
+        // Ukendt status i midten
+        if (unknownPlayers.length > 0) {
+
+            const title = document.createElement("h3");
+            title.className = "section-title";
+            title.textContent = `Unknown Status (${unknownPlayers.length})`;
+
+            normalPlayers.appendChild(title);
+
+            unknownPlayers.forEach(player => {
+                normalPlayers.appendChild(createCard(player));
+            });
+        }
+
+        // Banned nederst
+        if (banned.length > 0) {
+
+            const title = document.createElement("h3");
+            title.className = "section-title";
+            title.textContent = `Banned Players (${banned.length})`;
+
+            bannedPlayers.appendChild(title);
+
+            banned.forEach(player => {
+                bannedPlayers.appendChild(createCard(player));
+            });
+        }
+
+        if (players.length === 0) {
+            statusText.textContent = "No players found.";
+        } else {
+            statusText.textContent =
+                `${players.length} players found | ${safePlayers.length} not banned | ${banned.length} banned`;
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+        statusText.textContent =
+            "Could not fetch players. Check API or CORS settings.";
+
+    }
+}
+
+</script>
+
+</body>
+</html>
